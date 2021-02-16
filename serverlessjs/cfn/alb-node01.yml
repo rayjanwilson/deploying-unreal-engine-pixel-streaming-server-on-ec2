@@ -1,0 +1,36 @@
+Resources:
+  TargetGroupNode01:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckIntervalSeconds: 30
+      HealthCheckPath: /
+      Port: 80
+      Protocol: HTTP
+      HealthCheckPort: traffic-port
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 5
+      UnhealthyThresholdCount: 2
+      TargetType: instance
+      Targets:
+        - 
+          Id: !Ref EC2Node01
+          Port: 80
+      Matcher: 
+        HttpCode: 200
+      HealthyThresholdCount: 5
+      VpcId: !Ref PubPrivateVPC
+      HealthCheckEnabled: true
+  
+  ListenerRule01:
+    Type: AWS::ElasticLoadBalancingV2::ListenerRule
+    Properties:
+      Priority: 1
+      ListenerArn: !Ref HTTPListener
+      Actions: 
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroupNode01
+      Conditions:
+        - Field: path-pattern
+          PathPatternConfig:
+            Values: 
+              - /

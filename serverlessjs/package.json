@@ -1,0 +1,16 @@
+{
+  "name": "ue4-pixel-streamer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {
+    "serverless": "^2.23.0",
+    "serverless-stack-output": "^0.2.3",
+    "wscat": "^4.0.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}

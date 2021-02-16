@@ -1,0 +1,4 @@
+{
+  "ALBEndpoint": "http://ue4-p-Appli-OP8E91C88UET-1303555878.us-east-1.elb.amazonaws.com",
+  "ServerlessDeploymentBucketName": "ue4-pixel-streamer-dev-serverlessdeploymentbucket-1kvh0qlux7e91"
+}

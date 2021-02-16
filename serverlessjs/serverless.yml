@@ -1,0 +1,23 @@
+service: ue4-pixel-streamer
+
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+
+plugins:
+  - serverless-stack-output
+
+custom: ${file(serverless.env.yml)}
+
+resources:
+  - ${file(cfn/vpc.yml)}
+  - ${file(cfn/alb-base.yml)}
+  - ${file(cfn/alb-node01.yml)}
+  - ${file(cfn/ec2-base.yml)}
+  - ${file(cfn/ec2-node01.yml)}
+  - ${file(cfn/ec2-windows.yml)}

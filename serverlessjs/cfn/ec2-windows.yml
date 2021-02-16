@@ -1,0 +1,282 @@
+Conditions:
+    IsWindows2019:
+      Fn::Equals:
+        - ${self:custom.OsVersion}
+        - WindowsServer2019
+    IsWindows2016:
+      Fn::Equals:
+        - ${self:custom.OsVersion}
+        - WindowsServer2016
+    IsWindows2012:
+      Fn::Equals:
+        - ${self:custom.OsVersion}
+        - WindowsServer2012R2
+    CreateWindows:
+      Fn::Or:
+      - Condition: IsWindows2019
+      - Condition: IsWindows2016
+      - Condition: IsWindows2012
+Resources:
+  WindowsInstance:
+    Type: AWS::EC2::Instance
+    Condition: CreateWindows
+    Properties:
+      InstanceType: ${self:custom.InstanceType}
+      IamInstanceProfile:
+        Ref: RootInstanceProfile
+      ImageId: ${self:custom.ami.${self:custom.OsVersion}}
+      SecurityGroupIds:
+      - Ref: DCVSecurityGroup
+      Tags:
+      - Key: RemoteVisualization
+        Value: DCV-preview
+      - Key: Name
+        Value:
+          Ref: AWS::StackName
+      - Key: DCV
+        Value: DCV
+      KeyName: ${self:custom.KeyPairName}
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sda1"
+        Ebs:
+          VolumeSize: ${self:custom.DiskSize}
+          VolumeType: gp2
+      UserData: ${self:custom.WindowsUserData}
+    Metadata:
+      AWS::CloudFormation::Authentication:
+        S3AccessCreds:
+          type: S3
+          roleName:
+            Ref: RootRole
+      AWS::CloudFormation::Init:
+        configSets:
+          initialize:
+          - download
+          - install
+          - restart
+        download:
+          files:
+            C:\PixelStreamer\Downloads\UE4-Pixel-Streamer-Bootstrap.ps1:
+              source:
+                Fn::Join:
+                - ''
+                - - ${self:custom.PixelStreamerBootstrapLocation}
+              authentication: S3AccessCreds
+            C:\PixelStreamer\Downloads\PixelStreamerProject.zip:
+              source:
+                Fn::Join:
+                - ''
+                - - ${self:custom.PixelStreamerBuildLocation}
+              authentication: S3AccessCreds
+            C:\dcv-install\install.ps1:
+              source:
+                Fn::Join:
+                - ''
+                - - https://s3-eu-west-1.amazonaws.com/nice-dcv-cfn/dcv-server-install.ps1
+              authentication: S3AccessCreds
+            C:\dcv-install\conf.ps1:
+              content:
+                Fn::Join:
+                - ''
+                - - "$dcvBucket = \"nice-dcv-cfn\"\r\n"
+                  - "$depBucket = \"nice-dcv-cfn\"\r\n"
+                  - "$devConPackage = \"DevCon.zip\"\r\n"
+                  - "$dcvPackageName = \"nice-dcv-server-x64-Release-2020.0-latest.msi\"\r\n"
+                  - $firefoxPackage = "
+                  - ${self:custom.VersionMap.firefox.default}
+                  - "\"\r\n"
+                  - "$userName = \"Administrator\"\r\n"
+                  - $userPasswd = "
+                  - ${self:custom.UserPasswd}
+                  - "\"\r\n"
+                  - "$logLevel = \"info\"\r\n"
+                  - $waitHandle = "
+                  - Ref: InstanceWaitHandle
+                  - "\"\r\n"
+                  - $windowsVersion = "
+                  - ${self:custom.OsVersion}
+                  - "\"\r\n"
+          services:
+            windows:
+              cfn-hup:
+                enabled: true
+                ensureRunning: true
+                files:
+                - c:\cfn\cfn-hup.conf
+                - c:\cfn\hooks.d\cfn-auto-reloader.conf
+              audiosrv:
+                enabled: true
+                ensureRunning: true
+          packages:
+            msi:
+              awscli: https://s3.amazonaws.com/aws-cli/AWSCLI64.msi
+              awstools: http://sdk-for-net.amazonwebservices.com/latest/AWSToolsAndSDKForNet.msi
+        install:
+          commands:
+            install-dcv:
+              command: powershell.exe -noprofile -executionpolicy bypass C:\dcv-install\install.ps1 > C:\dcv-install\install.log
+              waitAfterCompletion: 0
+              ignoreErrors: true
+            install-UE4-Pixel-Streaming:
+              command: powershell.exe -noprofile -executionpolicy bypass C:\PixelStreamer\Downloads\UE4-Pixel-Streamer-Bootstrap.ps1 > C:\PixelStreamer\Downloads\UE4-Pixel-Streamer-Bootstrap.log
+              waitAfterCompletion: 0
+              ignoreErrors: true
+        restart:
+          commands:
+            restart:
+              command: shutdown /r /t 10 /d p:4:1 /c "CloudFormation Restart"
+              waitAfterCompletion: forever
+      AWS::CloudFormation::Designer:
+        id: e5cac32e-b5c6-46ba-9430-1f9b7275b5b6
+  RootRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+    Metadata:
+      AWS::CloudFormation::Designer:
+        id: 6f9e3cf3-dc65-4bcc-a7aa-298486effe69
+  RolePolicies:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: DcvInstallAccess
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - logs:*
+          - s3:*
+          Resource: "*"
+        - Effect: Allow
+          Action:
+          - s3:GetObject
+          Resource: arn:aws:s3:::nice-dcv-cfn/*
+      Roles:
+      - Ref: RootRole
+    Metadata:
+      AWS::CloudFormation::Designer:
+        id: 7160187f-0a7e-451f-bcb1-85783245c504
+  RootInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - Ref: RootRole
+    Metadata:
+      AWS::CloudFormation::Designer:
+        id: a36c5fb2-26ae-49c8-bffb-628118f2cd10
+  WindowsInstanceWaitCondition:
+    Type: AWS::CloudFormation::WaitCondition
+    Condition: CreateWindows
+    DependsOn: WindowsInstance
+    Properties:
+      Handle:
+        Ref: InstanceWaitHandle
+      Timeout: 5400
+  InstanceWaitHandle:
+    Type: AWS::CloudFormation::WaitConditionHandle
+  DCVSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: DCV Security Group
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: ${self:custom.NiceDCVAccessCIDR}
+        Description: SSH Port
+      - IpProtocol: tcp
+        FromPort: 3389
+        ToPort: 3389
+        CidrIp: ${self:custom.NiceDCVAccessCIDR}
+        Description: Remote Desktop Port
+      - IpProtocol: tcp
+        FromPort: 8443
+        ToPort: 8443
+        CidrIp: ${self:custom.NiceDCVAccessCIDR}
+        Description: Nice DCV Port
+      - IpProtocol: tcp
+        FromPort: 80
+        ToPort: 80
+        CidrIp: ${self:custom.PixelStreamingAccessCIDR}
+        Description: UE4 Pixel Streamer - Webserver Port
+      - IpProtocol: tcp
+        FromPort: 443
+        ToPort: 443
+        CidrIp: ${self:custom.PixelStreamingAccessCIDR}
+        Description: UE4 Pixel Streamer - Secure Webserver Port
+      - IpProtocol: tcp
+        FromPort: 8888
+        ToPort: 8888
+        CidrIp: ${self:custom.PixelStreamingAccessCIDR}
+        Description: UE4 Pixel Streamer - Application Streaming Port
+      - IpProtocol: udp
+        FromPort: 8888
+        ToPort: 8888
+        CidrIp: ${self:custom.PixelStreamingAccessCIDR}
+        Description: UE4 Pixel Streamer - Application Streaming Port
+      - IpProtocol: tcp
+        FromPort: 19302
+        ToPort: 19303
+        CidrIp: ${self:custom.PixelStreamingAccessCIDR}
+        Description: UE4 Pixel Streamer - STUN/TURN Ports
+      - IpProtocol: udp
+        FromPort: 19302
+        ToPort: 19303
+        CidrIp: ${self:custom.PixelStreamingAccessCIDR}
+        Description: UE4 Pixel Streamer - STUN/TURN Ports
+Outputs:
+  WindowsInstanceId:
+    Value:
+      Ref: WindowsInstance
+    Condition: CreateWindows
+    Description: Instance ID for the newly created EC2 instance
+  WindowsPublicDNS:
+    Value: ${WindowsInstance.PublicDnsName}
+    Condition: CreateWindows
+    Description: Web URL for Streaming Server, using DNS Name of the newly created EC2 instance
+  WindowsPublicIp:
+    Value: ${WindowsInstance.PublicIp}
+    Condition: CreateWindows
+    Description: Public IP address of the newly created EC2 instance
+  WindowsDcvURL:
+    Value: https://${WindowsInstance.PublicIp}:8443
+    Condition: CreateWindows
+    Description: Connection URL for web access to the newly created EC2 instance via Nice DCV
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+    - Label:
+        default: Software
+      Parameters:
+      - OsVersion
+    - Label:
+        default: Credentials
+      Parameters:
+      - UserPasswd
+    - Label:
+        default: EC2
+      Parameters:
+      - InstanceType
+      - DiskSize
+      - KeyPairName
+    ParameterLabels:
+      InstanceType:
+        default: 'Instance Type:'
+      DiskSize:
+        default: 'Disk Size:'
+      KeyPairName:
+        default: 'Key pair name:'
+      UserPasswd:
+        default: 'Password:'
+      OsVersion:
+        default: 'Operating System:'

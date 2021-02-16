@@ -1,0 +1,20 @@
+Resources:
+  EC2Node01:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ${self:custom.ami.amzn2}
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      InstanceType: t3.large
+      SecurityGroupIds: 
+        - !Ref EC2SecurityGroup
+      SubnetId: !Ref PrivateSubnet1
+      BlockDeviceMappings:
+        -
+          DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 40
+      UserData: ${self:custom.UserData}
+      Tags:
+        - Key: Name
+          Value: node01-${self:service}-${self:provider.stage}
+  
