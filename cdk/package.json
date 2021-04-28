@@ -11,22 +11,23 @@
     "cdk": "cdk"
   },
   "devDependencies": {
-    "@aws-cdk/assert": "^1.100.0",
+    "@aws-cdk/assert": "^1.101.0",
     "@types/jest": "^26.0.10",
     "@types/node": "^14.14.43",
-    "aws-cdk": "^1.100.0",
+    "aws-cdk": "^1.101.0",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.2.4"
   },
   "dependencies": {
-    "@aws-cdk/aws-autoscaling": "^1.100.0",
-    "@aws-cdk/aws-ec2": "^1.100.0",
-    "@aws-cdk/aws-elasticloadbalancingv2": "^1.100.0",
-    "@aws-cdk/aws-iam": "^1.100.0",
-    "@aws-cdk/aws-imagebuilder": "^1.100.0",
-    "@aws-cdk/core": "^1.100.0",
+    "@aws-cdk/aws-autoscaling": "^1.101.0",
+    "@aws-cdk/aws-ec2": "^1.101.0",
+    "@aws-cdk/aws-elasticloadbalancingv2": "^1.101.0",
+    "@aws-cdk/aws-iam": "^1.101.0",
+    "@aws-cdk/aws-imagebuilder": "^1.101.0",
+    "@aws-cdk/aws-s3": "^1.101.0",
+    "@aws-cdk/core": "^1.101.0",
     "@types/js-yaml": "^4.0.0",
     "js-yaml": "^4.1.0",
     "source-map-support": "^0.5.16"
