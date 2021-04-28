@@ -6,8 +6,10 @@ phases:
     steps:
       - name: nvidia
         action: ExecutePowerShell
+        onFailure: Abort
+        timeoutSeconds: 300
         inputs:
           commands:
-            - Write-Host 'Installing nvidia drivers'
-            # - C:\ProgramData\chocolatey\bin\choco.exe install -y nvidia-display-driver
-            - choco install -y nvidia-display-driver
+            - |
+              Write-Host 'Installing nvidia drivers'
+              C:\ProgramData\chocolatey\bin\choco.exe install -y nvidia-display-driver

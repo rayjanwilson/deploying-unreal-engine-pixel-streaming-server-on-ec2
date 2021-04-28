@@ -6,16 +6,10 @@ phases:
     steps:
       - name: nodejs
         action: ExecutePowerShell
+        onFailure: Abort
+        timeoutSeconds: 300
         inputs:
           commands:
-            - Write-Host 'Installing node'
-            # - C:\ProgramData\chocolatey\bin\choco.exe install -y nodejs-lts
-            - choco install -y nodejs-lts
-
-  # - name: validate
-  #   steps:
-  #     - name: ValidateInstalls
-  #       action: ExecutePowerShell
-  #       inputs:
-  #         commands:
-  #           - node --version
+            - |
+              Write-Host 'Installing nodejs'
+              C:\ProgramData\chocolatey\bin\choco.exe install -y nodejs-lts

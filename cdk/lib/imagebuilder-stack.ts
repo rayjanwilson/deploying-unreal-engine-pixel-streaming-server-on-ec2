@@ -34,11 +34,14 @@ export class ImageBuilderStack extends cdk.Stack {
 
         // image builder components
 
+        const component_version = "0.0.5"
+        const image_version = "1.0.5"
+
         const component_firewall_data = YAML.load(fs.readFileSync('resources/install_firewall_rules.yml', 'utf8'));
         const component_firewall = new imagebuilder.CfnComponent(this, "InstallFirewallRules", {
             name: "FirewallRulesCoomponent",
             platform: "Windows",
-            version: "0.1.0",
+            version: component_version,
             data: YAML.dump(component_firewall_data)
         });
 
@@ -46,7 +49,7 @@ export class ImageBuilderStack extends cdk.Stack {
         const component_nodejs = new imagebuilder.CfnComponent(this, "InstallNodeJS", {
             name: "NodeJSComponent",
             platform: "Windows",
-            version: "0.1.0",
+            version: component_version,
             data: YAML.dump(component_nodejs_data)
         });
 
@@ -54,7 +57,7 @@ export class ImageBuilderStack extends cdk.Stack {
         const component_nvidia = new imagebuilder.CfnComponent(this, "InstallNvidia", {
             name: "NvidiaComponent",
             platform: "Windows",
-            version: "0.1.0",
+            version: component_version,
             data: YAML.dump(component_nvidia_data)
         });
 
@@ -62,7 +65,7 @@ export class ImageBuilderStack extends cdk.Stack {
         const component_nice_dcv = new imagebuilder.CfnComponent(this, "InstallNiceDCV", {
             name: "NiceDCVComponent",
             platform: "Windows",
-            version: "0.1.0",
+            version: component_version,
             data: YAML.dump(component_nice_dcv_data)
         });
 
@@ -76,11 +79,11 @@ export class ImageBuilderStack extends cdk.Stack {
 
         const rcp = new imagebuilder.CfnImageRecipe(this, 'UEPSWindowsImageRecipe', {
             name: 'UEPSWindowsImageRecipe',
-            version: '1.0.0',
+            version: image_version,
             components: [
-                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/dotnet-core-sdk-windows/3.1.0'},
+                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/dotnet-core-sdk-windows/3.1.0' },
                 { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/amazon-cloudwatch-agent-windows/1.0.0' },
-                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/aws-cli-version-2-windows/1.0.0'},
+                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/aws-cli-version-2-windows/1.0.0' },
                 { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/chocolatey/1.0.0' },
                 { "componentArn": component_firewall.attrArn },
                 { "componentArn": component_nodejs.attrArn },

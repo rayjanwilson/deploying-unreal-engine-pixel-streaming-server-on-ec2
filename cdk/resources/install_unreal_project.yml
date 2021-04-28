@@ -1,0 +1,11 @@
+name: InstallNodeJS
+description: this document installs nodejs via choco on Windows.
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: DownloadRecipe
+        action: S3Download
+        inputs:
+          - source: s3://<enter_s3_bucket_name_here>/<enter_s3_object_key_here>
+            destination: '{{ build.RecipeDestination.outputs.stdout }}'

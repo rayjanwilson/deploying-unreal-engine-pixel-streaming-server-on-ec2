@@ -6,13 +6,16 @@ phases:
     steps:
       - name: Firewall
         action: ExecutePowerShell
+        onFailure: Abort
+        timeoutSeconds: 300
         inputs:
           commands:
-            - Write-Output "Adding Windows Firewall Rules for UE4 Pixel Streaming"
-            - New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol TCP -LocalPort 80
-            - New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol TCP -LocalPort 443
-            - New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol TCP -LocalPort 19302-19303
-            - New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8888
-            - New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol UDP -LocalPort 8888
-            - New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol UDP -LocalPort 19302-19303
-            - Write-Output "Windows Firewall Rules Added for UE4 Pixel Streaming"
+            - |
+              Write-Output "Adding Windows Firewall Rules for UE4 Pixel Streaming"
+              New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol TCP -LocalPort 80
+              New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol TCP -LocalPort 443
+              New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol TCP -LocalPort 19302-19303
+              New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol TCP -LocalPort 8888
+              New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol UDP -LocalPort 8888
+              New-NetFirewallRule -DisplayName 'UE4_Pixel_Streamer' -PolicyStore PersistentStore -Direction Inbound -Action Allow -Protocol UDP -LocalPort 19302-19303
+              Write-Output "Windows Firewall Rules Added for UE4 Pixel Streaming"

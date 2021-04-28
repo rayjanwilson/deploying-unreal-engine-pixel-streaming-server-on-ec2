@@ -6,8 +6,10 @@ phases:
     steps:
       - name: nicedcv
         action: ExecutePowerShell
+        onFailure: Abort
+        timeoutSeconds: 300
         inputs:
           commands:
-            - Write-Host 'Installing NICE DCV'
-            # - C:\ProgramData\chocolatey\bin\choco.exe install -y nice-dcv-server
-            - choco install -y nice-dcv-server
+            - |
+              Write-Host 'Installing NICE DCV'
+              C:\ProgramData\chocolatey\bin\choco.exe install -y nice-dcv-server
