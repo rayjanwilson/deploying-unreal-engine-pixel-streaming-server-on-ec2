@@ -32,38 +32,69 @@ export class ImageBuilderStack extends cdk.Stack {
             stringRepresentation: 'Everything'
         }));
 
-        // image builder
+        // image builder components
 
-        const dependencyInstallData = YAML.load(fs.readFileSync('resources/AMIDependencyInstall.yaml', 'utf8'));
-        const installComponent = new imagebuilder.CfnComponent(this, "UEPSInstallComp", {
-            name: "AMIDependencyInstall",
+        const component_firewall_data = YAML.load(fs.readFileSync('resources/install_firewall_rules.yml', 'utf8'));
+        const component_firewall = new imagebuilder.CfnComponent(this, "InstallFirewallRules", {
+            name: "FirewallRulesCoomponent",
             platform: "Windows",
-            version: "0.1.3",
-            data: YAML.dump(dependencyInstallData)
-        })
+            version: "0.1.0",
+            data: YAML.dump(component_firewall_data)
+        });
+
+        const component_nodejs_data = YAML.load(fs.readFileSync('resources/install_nodejs.yml', 'utf8'));
+        const component_nodejs = new imagebuilder.CfnComponent(this, "InstallNodeJS", {
+            name: "NodeJSComponent",
+            platform: "Windows",
+            version: "0.1.0",
+            data: YAML.dump(component_nodejs_data)
+        });
+
+        const component_nvidia_data = YAML.load(fs.readFileSync('resources/install_nvidia.yml', 'utf8'));
+        const component_nvidia = new imagebuilder.CfnComponent(this, "InstallNvidia", {
+            name: "NvidiaComponent",
+            platform: "Windows",
+            version: "0.1.0",
+            data: YAML.dump(component_nvidia_data)
+        });
+
+        const component_nice_dcv_data = YAML.load(fs.readFileSync('resources/install_nice_dcv.yml', 'utf8'));
+        const component_nice_dcv = new imagebuilder.CfnComponent(this, "InstallNiceDCV", {
+            name: "NiceDCVComponent",
+            platform: "Windows",
+            version: "0.1.0",
+            data: YAML.dump(component_nice_dcv_data)
+        });
+
+
+        // image builder pipeline
 
         const instanceprofile = new iam.CfnInstanceProfile(this, "UEPSWindowsImageInstanceProfile", {
             instanceProfileName: 'UEPSWindowsImageInstanceProfile',
             roles: [role.roleName]
-        })
+        });
 
         const rcp = new imagebuilder.CfnImageRecipe(this, 'UEPSWindowsImageRecipe', {
             name: 'UEPSWindowsImageRecipe',
-            version: '1.0.3',
+            version: '1.0.0',
             components: [
+                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/dotnet-core-sdk-windows/3.1.0'},
                 { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/amazon-cloudwatch-agent-windows/1.0.0' },
+                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/aws-cli-version-2-windows/1.0.0'},
                 { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/chocolatey/1.0.0' },
-                { "componentArn": installComponent.attrArn }
+                { "componentArn": component_firewall.attrArn },
+                { "componentArn": component_nodejs.attrArn },
+                { "componentArn": component_nvidia.attrArn },
+                { "componentArn": component_nice_dcv.attrArn }
             ],
             // Core image should be used for deploying, base is helpful for development debugging
             // parentImage: 'arn:aws:imagebuilder:us-east-1:aws:image/windows-server-2019-english-core-base-x86/x.x.x'
             parentImage: 'arn:aws:imagebuilder:us-east-1:aws:image/windows-server-2019-english-full-base-x86/x.x.x'
-        })
-
+        });
 
         const infraconfig = new imagebuilder.CfnInfrastructureConfiguration(this, "UEPSWindowsImageInfrastructureConfig", {
             name: "UEPSWindowsImageInfrastructureConfig",
-            instanceTypes: ["m5.xlarge"],
+            instanceTypes: ["g4dn.xlarge"],
             instanceProfileName: "UEPSWindowsImageInstanceProfile",
             subnetId: subnet.subnetId,
             securityGroupIds: [sg.securityGroupId]

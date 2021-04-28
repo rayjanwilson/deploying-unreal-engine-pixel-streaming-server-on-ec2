@@ -12,3 +12,9 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
  * `cdk deploy`      deploy this stack to your default AWS account/region
  * `cdk diff`        compare deployed stack with current state
  * `cdk synth`       emits the synthesized CloudFormation template
+
+
+To find aws managed components to add to your image recipe, there is no online registry. You'll have to go through aws web console.
+
+Note: There is a known issue wrt version numbers for the image recipe and the component recipe. For the time being, if you edit `resources/AMIDependencyInstall.yaml` then you'll have to increment `onst installComponent = new imagebuilder.CfnComponent` and if you add new components to `const rcp = new imagebuilder.CfnImageRecipe(` then you'll have to increment its version.
+Punting on that automation for now

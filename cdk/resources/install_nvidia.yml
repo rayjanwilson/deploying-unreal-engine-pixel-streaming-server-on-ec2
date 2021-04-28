@@ -1,0 +1,13 @@
+name: InstallNvidia
+description: this document installs nvidia drivers via choco on Windows.
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: nvidia
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host 'Installing nvidia drivers'
+            # - C:\ProgramData\chocolatey\bin\choco.exe install -y nvidia-display-driver
+            - choco install -y nvidia-display-driver

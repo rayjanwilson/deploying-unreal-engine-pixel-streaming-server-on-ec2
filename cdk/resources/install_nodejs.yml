@@ -1,0 +1,21 @@
+name: InstallNodeJS
+description: this document installs nodejs via choco on Windows.
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: nodejs
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host 'Installing node'
+            # - C:\ProgramData\chocolatey\bin\choco.exe install -y nodejs-lts
+            - choco install -y nodejs-lts
+
+  # - name: validate
+  #   steps:
+  #     - name: ValidateInstalls
+  #       action: ExecutePowerShell
+  #       inputs:
+  #         commands:
+  #           - node --version
