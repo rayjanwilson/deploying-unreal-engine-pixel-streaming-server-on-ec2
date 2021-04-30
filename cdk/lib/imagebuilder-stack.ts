@@ -39,7 +39,7 @@ export class ImageBuilderStack extends cdk.Stack {
 
         const component_firewall_data = YAML.load(fs.readFileSync('resources/install_firewall_rules.yml', 'utf8'));
         const component_firewall = new imagebuilder.CfnComponent(this, "InstallFirewallRules", {
-            name: "FirewallRulesCoomponent",
+            name: "FirewallRulesComponent",
             platform: "Windows",
             version: component_version,
             data: YAML.dump(component_firewall_data)
@@ -111,6 +111,7 @@ export class ImageBuilderStack extends cdk.Stack {
         })
         pipeline.addDependsOn(rcp);
         pipeline.addDependsOn(infraconfig);
+
 
     }
 }
