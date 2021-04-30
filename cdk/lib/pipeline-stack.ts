@@ -24,7 +24,7 @@ export class PipelineStack extends Stack {
                     },
                 },
                 artifacts: {
-                    // 'base-directory': 'cdk.out/',
+                    "base-directory": "cdk/cdk.out",
                     files: [`${this.stackName}.template.json`]
                 }
             }),
