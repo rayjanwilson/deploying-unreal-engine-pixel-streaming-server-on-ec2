@@ -34,8 +34,8 @@ export class ImageBuilderStack extends cdk.Stack {
 
         // image builder components
 
-        const component_version = "0.0.5"
-        const image_version = "1.0.5"
+        const component_version = "1.0.0"
+        const image_version = "1.0.0"
 
         const component_firewall_data = YAML.load(fs.readFileSync('resources/install_firewall_rules.yml', 'utf8'));
         const component_firewall = new imagebuilder.CfnComponent(this, "InstallFirewallRules", {

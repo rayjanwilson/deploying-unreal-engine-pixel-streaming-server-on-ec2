@@ -53,6 +53,7 @@ export class PipelineStack extends Stack {
 
         // Pipeline
         new cp.Pipeline(this, 'BuildPipeline', {
+            restartExecutionOnUpdate: true,
             stages: [
                 {
                     stageName: 'Source',
@@ -89,8 +90,7 @@ export class PipelineStack extends Stack {
                         })
                     ]
                 }
-            ],
-            restartExecutionOnUpdate: true
+            ]
         })
 
     }
