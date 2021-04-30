@@ -20,7 +20,7 @@ export class PipelineStack extends Stack {
                         commands: ["cd cdk", "npm install"],
                     },
                     build: {
-                        commands: ["npm run build", "npm run cdk synth --", "ls -la"],
+                        commands: ["npm run build", "npm run cdk synth --", "ls -la", " ls -la cdk.out/"],
                     },
                 },
                 artifacts: {
@@ -32,6 +32,7 @@ export class PipelineStack extends Stack {
                 buildImage: cb.LinuxBuildImage.STANDARD_5_0
             }
         });
+
         // Actions
         const sourceAction = new cpa.GitHubSourceAction({
             actionName: "GitHubSource",
@@ -43,6 +44,7 @@ export class PipelineStack extends Stack {
             trigger: cpa.GitHubTrigger.WEBHOOK
         });
 
+        // Pipeline
         new cp.Pipeline(this, 'BuildPipeline', {
             stages: [
                 {
