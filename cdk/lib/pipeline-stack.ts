@@ -25,7 +25,14 @@ export class PipelineStack extends Stack {
                 },
                 artifacts: {
                     "base-directory": "cdk/cdk.out",
-                    files: [`${this.stackName}.template.json`]
+                    files: [
+                        `${this.stackName}.template.json`,
+                        'UEPSNetworkStack.template.json',
+                        'UEPSBuilderStack.template.json',
+                        'cdk.out',
+                        'manifest.json',
+                        'tree.json'
+                    ]
                 }
             }),
             environment: {
@@ -67,6 +74,18 @@ export class PipelineStack extends Stack {
                             stackName: this.stackName,
                             adminPermissions: true,
                             runOrder: 2,
+                        })
+                    ]
+                },
+                {
+                    stageName: 'AMIBuilder',
+                    actions: [
+                        new cpa.CloudFormationCreateUpdateStackAction({
+                            actionName: 'ImageBuilder',
+                            adminPermissions: true,
+                            templatePath: cdkBuildOutput.atPath('UEPSBuilderStack.template.json'),
+                            stackName: 'UEPSBuilderStack',
+                            runOrder: 1
                         })
                     ]
                 }
