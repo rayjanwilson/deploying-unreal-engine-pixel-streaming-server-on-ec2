@@ -14,6 +14,9 @@ export class ImageBuilderStack extends cdk.Stack {
     constructor(scope: cdk.Construct, id: string, props: Props) {
         super(scope, id, props);
 
+        // "this" is the current construct. use for pseudo paramters
+        const stack = cdk.Stack.of(this);
+
         let role = new iam.Role(this, 'UEPSWindowsImageBuilderRole', {
             assumedBy: new iam.ServicePrincipal('ec2.amazonaws.com'),
             managedPolicies: [
@@ -81,10 +84,10 @@ export class ImageBuilderStack extends cdk.Stack {
             name: 'UEPSWindowsImageRecipe',
             version: image_version,
             components: [
-                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/dotnet-core-sdk-windows/3.1.0' },
-                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/amazon-cloudwatch-agent-windows/1.0.0' },
-                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/aws-cli-version-2-windows/1.0.0' },
-                { "componentArn": 'arn:aws:imagebuilder:us-east-1:aws:component/chocolatey/1.0.0' },
+                { "componentArn": `arn:aws:imagebuilder:${stack.region}:aws:component/dotnet-core-sdk-windows/3.1.0` },
+                { "componentArn": `arn:aws:imagebuilder:${stack.region}:aws:component/amazon-cloudwatch-agent-windows/1.0.0` },
+                { "componentArn": `arn:aws:imagebuilder:${stack.region}:aws:component/aws-cli-version-2-windows/1.0.0` },
+                { "componentArn": `arn:aws:imagebuilder:${stack.region}:aws:component/chocolatey/1.0.0` },
                 { "componentArn": component_firewall.attrArn },
                 { "componentArn": component_nodejs.attrArn },
                 { "componentArn": component_nvidia.attrArn },
@@ -92,7 +95,7 @@ export class ImageBuilderStack extends cdk.Stack {
             ],
             // Core image should be used for deploying, base is helpful for development debugging
             // parentImage: 'arn:aws:imagebuilder:us-east-1:aws:image/windows-server-2019-english-core-base-x86/x.x.x'
-            parentImage: 'arn:aws:imagebuilder:us-east-1:aws:image/windows-server-2019-english-full-base-x86/x.x.x'
+            parentImage: `arn:aws:imagebuilder:${stack.region}:aws:image/windows-server-2019-english-full-base-x86/x.x.x`
         });
 
         const infraconfig = new imagebuilder.CfnInfrastructureConfiguration(this, "UEPSWindowsImageInfrastructureConfig", {
