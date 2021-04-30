@@ -37,8 +37,8 @@ export class ImageBuilderStack extends cdk.Stack {
 
         // image builder components
 
-        const component_version = "1.0.0"
-        const image_version = "1.0.0"
+        const component_version = "1.0.1"
+        const image_version = "1.0.1"
 
         const component_firewall_data = YAML.load(fs.readFileSync('resources/install_firewall_rules.yml', 'utf8'));
         const component_firewall = new imagebuilder.CfnComponent(this, "InstallFirewallRules", {
@@ -107,14 +107,18 @@ export class ImageBuilderStack extends cdk.Stack {
         })
         infraconfig.addDependsOn(instanceprofile);
 
-        const pipeline = new imagebuilder.CfnImagePipeline(this, "UEPSWindowsImagePipeline", {
-            name: "UEPSWindowsImagePipeline",
+        // const pipeline = new imagebuilder.CfnImagePipeline(this, "UEPSWindowsImagePipeline", {
+        //     name: "UEPSWindowsImagePipeline",
+        //     imageRecipeArn: rcp.attrArn,
+        //     infrastructureConfigurationArn: infraconfig.attrArn
+        // })
+        // pipeline.addDependsOn(rcp);
+        // pipeline.addDependsOn(infraconfig);
+
+        new imagebuilder.CfnImage(this, 'UEPSWindowsImage', {
             imageRecipeArn: rcp.attrArn,
             infrastructureConfigurationArn: infraconfig.attrArn
-        })
-        pipeline.addDependsOn(rcp);
-        pipeline.addDependsOn(infraconfig);
-
+        });
 
     }
 }
