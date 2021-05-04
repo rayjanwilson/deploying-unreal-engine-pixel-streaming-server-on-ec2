@@ -4,6 +4,7 @@ import * as cdk from '@aws-cdk/core';
 import * as imagebuilder from '@aws-cdk/aws-imagebuilder';
 import * as YAML from 'js-yaml';
 import * as fs from 'fs';
+import { CfnPipeline } from '@aws-cdk/aws-codepipeline';
 
 interface Props extends cdk.StackProps {
     vpc: ec2.Vpc,
@@ -37,8 +38,8 @@ export class ImageBuilderStack extends cdk.Stack {
 
         // image builder components
 
-        const component_version = "1.0.1"
-        const image_version = "1.0.1"
+        const component_version = "1.0.4"
+        const image_version = "1.0.4"
 
         const component_firewall_data = YAML.load(fs.readFileSync('resources/install_firewall_rules.yml', 'utf8'));
         const component_firewall = new imagebuilder.CfnComponent(this, "InstallFirewallRules", {
@@ -50,7 +51,7 @@ export class ImageBuilderStack extends cdk.Stack {
 
         const component_nodejs_data = YAML.load(fs.readFileSync('resources/install_nodejs.yml', 'utf8'));
         const component_nodejs = new imagebuilder.CfnComponent(this, "InstallNodeJS", {
-            name: "NodeJSComponent",
+            name: "NodeJSComponentBump",
             platform: "Windows",
             version: component_version,
             data: YAML.dump(component_nodejs_data)
@@ -80,7 +81,7 @@ export class ImageBuilderStack extends cdk.Stack {
             roles: [role.roleName]
         });
 
-        const rcp = new imagebuilder.CfnImageRecipe(this, 'UEPSWindowsImageRecipe', {
+        const image_recipe = new imagebuilder.CfnImageRecipe(this, 'UEPSWindowsImageRecipe', {
             name: 'UEPSWindowsImageRecipe',
             version: image_version,
             components: [
@@ -88,6 +89,7 @@ export class ImageBuilderStack extends cdk.Stack {
                 { "componentArn": `arn:aws:imagebuilder:${stack.region}:aws:component/amazon-cloudwatch-agent-windows/1.0.0` },
                 { "componentArn": `arn:aws:imagebuilder:${stack.region}:aws:component/aws-cli-version-2-windows/1.0.0` },
                 { "componentArn": `arn:aws:imagebuilder:${stack.region}:aws:component/chocolatey/1.0.0` },
+                { "componentArn": `arn:aws:imagebuilder:${stack.region}:aws:component/update-windows/1.0.0` },
                 { "componentArn": component_firewall.attrArn },
                 { "componentArn": component_nodejs.attrArn },
                 { "componentArn": component_nvidia.attrArn },
@@ -105,20 +107,25 @@ export class ImageBuilderStack extends cdk.Stack {
             subnetId: subnet.subnetId,
             securityGroupIds: [sg.securityGroupId]
         })
-        infraconfig.addDependsOn(instanceprofile);
+        // infraconfig.addDependsOn(instanceprofile);
 
-        // const pipeline = new imagebuilder.CfnImagePipeline(this, "UEPSWindowsImagePipeline", {
-        //     name: "UEPSWindowsImagePipeline",
-        //     imageRecipeArn: rcp.attrArn,
-        //     infrastructureConfigurationArn: infraconfig.attrArn
-        // })
-        // pipeline.addDependsOn(rcp);
+        const pipeline = new imagebuilder.CfnImagePipeline(this, "UEPSWindowsImagePipeline", {
+            name: "UEPSWindowsImagePipeline",
+            imageRecipeArn: image_recipe.attrArn,
+            infrastructureConfigurationArn: infraconfig.attrArn,
+            schedule: {
+                scheduleExpression: 'cron(0 0 * * ? *)',
+                pipelineExecutionStartCondition: "EXPRESSION_MATCH_AND_DEPENDENCY_UPDATES_AVAILABLE"
+            }
+        });
+        // Run daily at midnight (UTC) https://docs.aws.amazon.com/imagebuilder/latest/userguide/cron-expressions.html
+        // pipeline.addDependsOn(image_recipe);
         // pipeline.addDependsOn(infraconfig);
 
-        new imagebuilder.CfnImage(this, 'UEPSWindowsImage', {
-            imageRecipeArn: rcp.attrArn,
-            infrastructureConfigurationArn: infraconfig.attrArn
-        });
+        // new imagebuilder.CfnImage(this, 'UEPSWindowsImage', {
+        //     imageRecipeArn: image_recipe.attrArn,
+        //     infrastructureConfigurationArn: infraconfig.attrArn
+        // });
 
     }
 }
