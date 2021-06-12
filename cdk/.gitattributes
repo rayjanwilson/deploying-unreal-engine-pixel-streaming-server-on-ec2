@@ -1,0 +1,7 @@
+# Set the repository to show as TypeScript rather than JS in GitHub
+*.js linguist-detectable=false
+
+# Checkout npm package files with forced LF lineendings
+# to prevent git conflicts when running npm commands
+package.json text eol=lf
+package-lock.json text eol=lf

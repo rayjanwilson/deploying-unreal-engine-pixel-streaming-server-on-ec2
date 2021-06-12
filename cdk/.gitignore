@@ -1,13 +1,44 @@
 *.js
+config.d.ts
+config.js
+!.eslintrc.js
 !jest.config.js
+!jest.config.int.js
 *.d.ts
-node_modules/
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
 
 # CDK asset staging directory
 .cdk.staging
-cdk.out/
+cdk.out
+
+# sam
+.aws-sam
+samconfig.toml
+
+# OS X
+.DS_Store
+
+# Dependency directories
+node_modules
+
+# Coverage directory
+coverage
+
+# eslint cache
+.eslintcache
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
